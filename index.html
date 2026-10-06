@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#6d5dfc">
+<meta name="description" content="POS Generator — create a detailed AI prompt for a Google Sheets + Google Apps Script Web POS.">
+<title>POS Generator — Create your free AI-powered Web POS</title>
+<style>
+:root{
+  --bg:#f5f7fb;--surface:#fff;--surface-2:#f8f9fd;--text:#172033;--muted:#667085;
+  --border:#e4e7ec;--primary:#6d5dfc;--primary-2:#8b5cf6;--primary-dark:#5546db;
+  --success:#16a34a;--danger:#dc2626;--shadow:0 20px 55px rgba(25,31,56,.09);--radius:18px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--text);line-height:1.5}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+.topbar{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.82);backdrop-filter:blur(14px);border-bottom:1px solid rgba(228,231,236,.8)}
+.topbar-inner{max-width:1180px;margin:auto;padding:15px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.brand{display:flex;align-items:center;gap:11px;font-weight:800;letter-spacing:-.02em}
+.brand-mark{width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,var(--primary),var(--primary-2));color:#fff;display:grid;place-items:center;box-shadow:0 8px 20px rgba(109,93,252,.28)}
+.brand small{display:block;color:var(--muted);font-size:11px;font-weight:600;letter-spacing:.02em}
+.hero{padding:70px 22px 42px;background:
+ radial-gradient(circle at 12% 20%,rgba(109,93,252,.18),transparent 32%),
+ radial-gradient(circle at 88% 0%,rgba(139,92,246,.16),transparent 28%),
+ linear-gradient(135deg,#fff 0%,#f4f2ff 52%,#eef6ff 100%)}
+.hero-inner{max-width:980px;margin:auto;text-align:center}
+.badge{display:inline-flex;align-items:center;gap:7px;padding:7px 11px;border:1px solid #ddd9ff;background:#fff;border-radius:999px;color:var(--primary-dark);font-size:12px;font-weight:800;margin-bottom:18px}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--success);box-shadow:0 0 0 4px rgba(22,163,74,.1)}
+h1{font-size:clamp(36px,6vw,64px);line-height:1.02;letter-spacing:-.055em;margin:0 0 18px}
+.hero p{max-width:720px;margin:0 auto;color:#596579;font-size:18px}
+.hero-flow{display:flex;justify-content:center;align-items:center;gap:10px;flex-wrap:wrap;margin-top:27px;color:#5f6b7d;font-size:13px;font-weight:700}
+.flow-pill{padding:8px 12px;background:#fff;border:1px solid var(--border);border-radius:999px;box-shadow:0 5px 15px rgba(25,31,56,.05)}
+main{max-width:1000px;margin:-5px auto 70px;padding:0 22px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:18px;overflow:hidden}
+.card-head{padding:25px 27px 8px}
+.card-head h2{font-size:21px;margin:0 0 5px;letter-spacing:-.025em}
+.card-head p{margin:0;color:var(--muted);font-size:14px}
+.card-body{padding:20px 27px 28px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:17px}
+.field{display:flex;flex-direction:column;gap:7px}
+.field.full{grid-column:1/-1}
+label{font-size:13px;font-weight:750;color:#344054}
+.req{color:var(--danger)}
+.help{font-size:11px;color:var(--muted);margin-top:-2px}
+input,select,textarea{
+  width:100%;border:1px solid #d9dee8;background:#fff;border-radius:12px;padding:12px 13px;
+  outline:none;color:var(--text);transition:.18s border,.18s box-shadow
+}
+input:focus,select:focus,textarea:focus{border-color:var(--primary);box-shadow:0 0 0 4px rgba(109,93,252,.11)}
+input.invalid,select.invalid{border-color:var(--danger);box-shadow:0 0 0 3px rgba(220,38,38,.08)}
+.error{display:none;color:var(--danger);font-size:11px;font-weight:650}
+.error.show{display:block}
+.inline{display:flex;gap:9px}
+.inline>*{flex:1}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 15px;border:1px solid var(--border);border-radius:13px;background:var(--surface-2)}
+.switch{position:relative;width:48px;height:27px;flex:none}
+.switch input{display:none}
+.slider{position:absolute;inset:0;background:#d5d9e2;border-radius:999px;transition:.2s}
+.slider:before{content:"";position:absolute;width:21px;height:21px;left:3px;top:3px;border-radius:50%;background:#fff;box-shadow:0 2px 5px rgba(0,0,0,.18);transition:.2s}
+.switch input:checked+.slider{background:var(--primary)}
+.switch input:checked+.slider:before{transform:translateX(21px)}
+.tax-panel{display:none;margin-top:12px}
+.tax-panel.show{display:block}
+.feature-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.feature{display:flex;gap:11px;align-items:flex-start;padding:13px;border:1px solid var(--border);border-radius:13px;background:#fff;transition:.15s}
+.feature:hover{border-color:#c8c2ff;background:#fbfaff}
+.feature input{width:18px;height:18px;margin:1px 0 0;accent-color:var(--primary)}
+.feature strong{display:block;font-size:13px}
+.feature span{display:block;font-size:11px;color:var(--muted);margin-top:2px}
+.actions{display:flex;justify-content:space-between;align-items:center;gap:15px;padding:21px 27px;background:#fbfcfe;border-top:1px solid var(--border)}
+.primary,.secondary{border:0;border-radius:12px;padding:13px 18px;font-weight:800;transition:.18s}
+.primary{background:linear-gradient(135deg,var(--primary),var(--primary-2));color:#fff;box-shadow:0 9px 22px rgba(109,93,252,.25)}
+.primary:hover{transform:translateY(-1px);box-shadow:0 12px 26px rgba(109,93,252,.3)}
+.secondary{background:#fff;color:#344054;border:1px solid var(--border)}
+.secondary:hover{background:#f8f9fc}
+.generate{width:100%;font-size:16px;padding:16px}
+.output{display:none}
+.output.show{display:block}
+.prompt-wrap{position:relative}
+textarea.prompt{min-height:580px;resize:vertical;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace;font-size:12px;line-height:1.58;background:#111827;color:#e5e7eb;border-color:#1f2937;padding:20px}
+.output-bar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:13px}
+.ready{display:flex;align-items:center;gap:9px;font-weight:800;color:#166534}
+.ready-icon{width:28px;height:28px;border-radius:50%;background:#dcfce7;display:grid;place-items:center}
+.button-row{display:flex;gap:9px;flex-wrap:wrap}
+.toast{position:fixed;right:20px;bottom:20px;z-index:50;background:#111827;color:#fff;padding:12px 15px;border-radius:12px;box-shadow:0 14px 35px rgba(0,0,0,.22);font-size:13px;font-weight:700;transform:translateY(20px);opacity:0;pointer-events:none;transition:.22s}
+.toast.show{transform:translateY(0);opacity:1}
+.footer{text-align:center;color:var(--muted);font-size:12px;padding:0 22px 45px}
+@media(max-width:720px){
+  .hero{padding-top:50px}.hero-flow{gap:7px}.grid,.feature-grid{grid-template-columns:1fr}
+  .card-head,.card-body,.actions{padding-left:18px;padding-right:18px}
+  .actions{flex-direction:column;align-items:stretch}.output-bar{align-items:flex-start;flex-direction:column}
+  h1{font-size:42px}
+}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand"><div class="brand-mark">P</div><div>POS Generator<small>AI-ready business POS builder</small></div></div>
+    <button class="secondary" id="resetTop">Reset</button>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="hero-inner">
+    <div class="badge"><span class="dot"></span> No code • No API key • Runs in your browser</div>
+    <h1>Create your own free AI-powered Web POS system</h1>
+    <p>Describe your business once. POS Generator creates a detailed, customized development prompt for an AI coding assistant to build your Google Sheets + Apps Script POS.</p>
+    <div class="hero-flow">
+      <span class="flow-pill">1. Tell us about your business</span><span>→</span>
+      <span class="flow-pill">2. Generate the prompt</span><span>→</span>
+      <span class="flow-pill">3. Build & deploy your POS</span>
+    </div>
+  </div>
+</section>
+
+<main>
+<form id="generatorForm" novalidate>
+  <section class="card">
+    <div class="card-head"><h2>Business Information</h2><p>These details personalize the POS while the generated app keeps them centralized in its Settings system.</p></div>
+    <div class="card-body">
+      <div class="grid">
+        <div class="field">
+          <label for="businessName">Business Name <span class="req">*</span></label>
+          <input id="businessName" name="businessName" placeholder="e.g. Nimal Fashion" required>
+          <span class="help">The name customers will see throughout the POS and receipts.</span><span class="error">Business name is required.</span>
+        </div>
+        <div class="field">
+          <label for="businessCategory">Business Category <span class="req">*</span></label>
+          <select id="businessCategory" name="businessCategory" required>
+            <option value="">Select a category</option><option>Clothing</option><option>Grocery</option><option>Cafe</option><option>Restaurant</option><option>Electronics</option><option>Mobile Shop</option><option>Pharmacy</option><option>Hardware</option><option>Beauty Salon</option><option>Bakery</option><option>Book Shop</option><option>Gift Shop</option><option>Supermarket</option><option>Other</option>
+          </select>
+          <span class="help">Choose the closest category. Select Other to enter your own.</span><span class="error">Business category is required.</span>
+        </div>
+        <div class="field" id="customCategoryField" style="display:none">
+          <label for="customCategory">Custom Business Category</label>
+          <input id="customCategory" placeholder="e.g. Auto Parts">
+          <span class="help">Used as the business category in the generated prompt.</span>
+        </div>
+        <div class="field">
+          <label for="currencyCode">Currency <span class="req">*</span></label>
+          <select id="currencyCode" name="currencyCode" required>
+            <option value="">Select currency</option><option value="LKR">LKR — Sri Lankan Rupee</option><option value="USD">USD — US Dollar</option><option value="GBP">GBP — British Pound</option><option value="EUR">EUR — Euro</option><option value="INR">INR — Indian Rupee</option><option value="AUD">AUD — Australian Dollar</option><option value="CAD">CAD — Canadian Dollar</option><option value="OTHER">Other</option>
+          </select>
+          <span class="help">All product prices, reports and receipts must use this currency.</span><span class="error">Currency is required.</span>
+        </div>
+        <div class="field">
+          <label for="currencySymbol">Currency Symbol <span class="req">*</span></label>
+          <input id="currencySymbol" name="currencySymbol" placeholder="e.g. Rs or $">
+          <span class="help">Examples: Rs, $, £, €, ₹. For Other, enter your preferred symbol.</span><span class="error">Currency symbol is required.</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card-head"><h2>Contact Information</h2><p>Optional details used for branding, receipts and business information.</p></div>
+    <div class="card-body">
+      <div class="grid">
+        <div class="field"><label for="address">Business Address</label><input id="address" placeholder="e.g. 123 Main Street"><span class="help">Street or full business address.</span></div>
+        <div class="field"><label for="city">City</label><input id="city" placeholder="e.g. Colombo"></div>
+        <div class="field"><label for="country">Country</label><input id="country" placeholder="e.g. Sri Lanka"></div>
+        <div class="field"><label for="phone">Contact Number</label><input id="phone" inputmode="tel" placeholder="e.g. 0712345678"></div>
+        <div class="field"><label for="email">Email</label><input id="email" type="email" placeholder="e.g. hello@example.com"><span class="help">Shown on receipts if enabled.</span></div>
+        <div class="field"><label for="website">Website</label><input id="website" type="url" placeholder="https://example.com"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card-head"><h2>Branding</h2><p>Keep the POS visually connected to the business.</p></div>
+    <div class="card-body">
+      <div class="grid">
+        <div class="field"><label for="logo">Logo URL</label><input id="logo" type="url" placeholder="https://example.com/logo.png"><span class="help">Optional public image URL. No file upload is required.</span></div>
+        <div class="field"><label for="primaryColor">Primary Color</label><div class="inline"><input id="primaryColor" type="color" value="#6d5dfc" style="height:46px;padding:5px"><input id="primaryColorText" value="#6d5dfc" aria-label="Primary color hex"></div><span class="help">The generated POS should use this as its main brand accent.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card-head"><h2>Receipt & Tax</h2><p>Control what appears on printable receipts and how tax is calculated.</p></div>
+    <div class="card-body">
+      <div class="grid">
+        <div class="field full"><label for="receiptFooter">Receipt Footer Message</label><input id="receiptFooter" placeholder="Thank you for shopping with us!"></div>
+        <div class="field full">
+          <div class="toggle-row"><div><strong>Enable Tax</strong><div class="help">When enabled, the POS should calculate tax on eligible sales.</div></div><label class="switch"><input type="checkbox" id="taxEnabled"><span class="slider"></span></label></div>
+          <div class="tax-panel" id="taxPanel"><label for="taxRate">Tax Rate (%)</label><input id="taxRate" type="number" min="0" max="100" step="0.01" value="0" placeholder="e.g. 8"></div>
+        </div>
+        <div class="field full">
+          <label>Show on Receipt</label>
+          <div class="feature-grid">
+            <label class="feature"><input type="checkbox" id="showAddress" checked><div><strong>Business address</strong><span>Print the configured address.</span></div></label>
+            <label class="feature"><input type="checkbox" id="showPhone" checked><div><strong>Phone number</strong><span>Print the configured contact number.</span></div></label>
+            <label class="feature"><input type="checkbox" id="showEmail"><div><strong>Email</strong><span>Print the configured email.</span></div></label>
+            <label class="feature"><input type="checkbox" id="showLogo" checked><div><strong>Logo</strong><span>Print the configured logo when available.</span></div></label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card-head"><h2>POS Features</h2><p>Core features are enabled by default. Turn off anything you do not need.</p></div>
+    <div class="card-body">
+      <div class="feature-grid" id="featureGrid"></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="actions">
+      <div><strong>Ready to generate?</strong><div class="help">Your information stays in this browser and is only used to build the prompt.</div></div>
+      <button class="primary generate" type="submit">Generate My POS Prompt →</button>
+    </div>
+  </section>
+</form>
+
+<section class="card output" id="outputCard">
+  <div class="card-head"><div class="output-bar"><div><div class="ready"><span class="ready-icon">✓</span>Your POS prompt is ready!</div><p style="margin-top:7px">Copy it into ChatGPT, Claude, Gemini, or another coding assistant.</p></div><div class="button-row"><button class="secondary" id="editBtn">Edit Details</button><button class="primary" id="copyBtn">Copy Prompt</button><button class="secondary" id="downloadBtn">Download Prompt</button></div></div></div>
+  <div class="card-body"><div class="prompt-wrap"><textarea class="prompt" id="promptOutput" readonly aria-label="Generated AI prompt"></textarea></div></div>
+</section>
+</main>
+
+<div class="footer">POS Generator is a client-side prompt builder. It does not create or store your POS database and does not require an API key.</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const FEATURE_DEFS = [
+  ["productManagement","Product Management","Add, edit, delete and search products.",true],
+  ["categoryManagement","Category Management","Create and manage product categories.",true],
+  ["stockManagement","Stock Management","Track inventory and update stock after sales.",true],
+  ["customerManagement","Customer Management","Store customers and their contact details.",true],
+  ["salesHistory","Sales History","View completed sales and invoice details.",true],
+  ["printableReceipt","Printable Receipt","Generate professional print-ready receipts.",true],
+  ["expenseManagement","Expense Management","Record and manage business expenses.",true],
+  ["dashboard","Dashboard","Show key business KPIs at a glance.",true],
+  ["salesReports","Sales Reports","Daily, weekly and monthly sales reporting.",true],
+  ["profitReports","Profit Reports","Estimate profit using sales, cost and expenses.",true],
+  ["lowStockAlerts","Low Stock Alerts","Highlight products at or below their stock limit.",true],
+  ["barcodeSku","Barcode/SKU Support","Store and search by SKU or barcode.",true],
+  ["discountSupport","Discount Support","Apply sale discounts safely.",true],
+  ["taxSupport","Tax Support","Calculate and display configured tax.",true],
+  ["multiplePayments","Multiple Payment Methods","Cash, Card, Bank Transfer and Other.",true],
+  ["purchaseHistory","Customer Purchase History","Show customer-specific previous purchases.",true],
+  ["aiAssistant","AI Business Assistant","Optional secure AI analysis architecture.",false]
+];
+
+const $ = id => document.getElementById(id);
+const featureGrid = $("featureGrid");
+FEATURE_DEFS.forEach(([id,label,desc,checked])=>{
+  const el=document.createElement("label");
+  el.className="feature";
+  el.innerHTML=`<input type="checkbox" id="feature_${id}" ${checked?"checked":""}><div><strong>${label}</strong><span>${desc}</span></div>`;
+  featureGrid.appendChild(el);
+});
+
+$("businessCategory").addEventListener("change",()=>{
+  $("customCategoryField").style.display=$("businessCategory").value==="Other"?"flex":"none";
+});
+$("currencyCode").addEventListener("change",()=>{
+  const map={LKR:"Rs",USD:"$",GBP:"£",EUR:"€",INR:"₹",AUD:"A$",CAD:"C$"};
+  if(map[$("currencyCode").value]) $("currencySymbol").value=map[$("currencyCode").value];
+});
+$("taxEnabled").addEventListener("change",()=>$("taxPanel").classList.toggle("show",$("taxEnabled").checked));
+$("primaryColor").addEventListener("input",()=>$("primaryColorText").value=$("primaryColor").value);
+$("primaryColorText").addEventListener("input",e=>{
+  if(/^#[0-9a-fA-F]{6}$/.test(e.target.value)) $("primaryColor").value=e.target.value;
+});
+function esc(v){return String(v??"").trim();}
+function getData(){
+  const category=$("businessCategory").value==="Other" ? esc($("customCategory").value) : esc($("businessCategory").value);
+  const features={};
+  FEATURE_DEFS.forEach(([id,label])=>features[id]={label,enabled:$("feature_"+id).checked});
+  return {
+    businessName:esc($("businessName").value),businessCategory:category,
+    currencyCode:esc($("currencyCode").value==="OTHER"?"CUSTOM":$("currencyCode").value),
+    currencySymbol:esc($("currencySymbol").value),
+    address:esc($("address").value),city:esc($("city").value),country:esc($("country").value),
+    phone:esc($("phone").value),email:esc($("email").value),website:esc($("website").value),
+    logo:esc($("logo").value),primaryColor:esc($("primaryColorText").value),
+    receiptFooter:esc($("receiptFooter").value),taxEnabled:$("taxEnabled").checked,
+    taxRate:esc($("taxRate").value)||"0",
+    receipt:{address:$("showAddress").checked,phone:$("showPhone").checked,email:$("showEmail").checked,logo:$("showLogo").checked},
+    features
+  };
+}
+function validate(){
+  let ok=true;
+  ["businessName","businessCategory","currencyCode","currencySymbol"].forEach(id=>{
+    const el=$(id); const valid=!!esc(el.value);
+    el.classList.toggle("invalid",!valid);
+    const err=el.parentElement.querySelector(".error"); if(err) err.classList.toggle("show",!valid);
+    if(!valid) ok=false;
+  });
+  if($("businessCategory").value==="Other"&&!esc($("customCategory").value)){ $("customCategory").classList.add("invalid");ok=false; }
+  else $("customCategory").classList.remove("invalid");
+  if($("taxEnabled").checked){
+    const n=Number($("taxRate").value);
+    if(!Number.isFinite(n)||n<0||n>100){$("taxRate").classList.add("invalid");ok=false}else $("taxRate").classList.remove("invalid");
+  }
+  if(!ok){
+    const first=document.querySelector(".invalid"); if(first) first.scrollIntoView({behavior:"smooth",block:"center"});
+  }
+  return ok;
+}
+function listEnabled(d){
+  return FEATURE_DEFS.filter(([id])=>d.features[id].enabled).map(([,label])=>label);
+}
+function valueOrNone(v){return v||"(not provided)";}
+function buildPrompt(d){
+return `You are a senior full-stack frontend developer, software architect, UX designer, Google Apps Script developer, and QA engineer. Build a REAL, WORKING SMALL-BUSINESS POINT-OF-SALE (POS) MVP from the exact requirements below.
+
+============================================================
+BUSINESS CONFIGURATION — CUSTOMIZE THE POS FOR THIS BUSINESS
+============================================================
+Business Name: ${valueOrNone(d.businessName)}
+Business Category: ${valueOrNone(d.businessCategory)}
+Currency Code: ${valueOrNone(d.currencyCode)}
+Currency Symbol: ${valueOrNone(d.currencySymbol)}
+Address: ${valueOrNone(d.address)}
+City: ${valueOrNone(d.city)}
+Country: ${valueOrNone(d.country)}
+Phone: ${valueOrNone(d.phone)}
+Email: ${valueOrNone(d.email)}
+Website: ${valueOrNone(d.website)}
+Logo URL: ${valueOrNone(d.logo)}
+Primary Color: ${valueOrNone(d.primaryColor)}
+Tax Enabled: ${d.taxEnabled ? "Yes" : "No"}
+Tax Rate: ${d.taxRate}%
+Receipt Footer: ${valueOrNone(d.receiptFooter)}
+Receipt should show address: ${d.receipt.address ? "Yes":"No"}
+Receipt should show phone: ${d.receipt.phone ? "Yes":"No"}
+Receipt should show email: ${d.receipt.email ? "Yes":"No"}
+Receipt should show logo: ${d.receipt.logo ? "Yes":"No"}
+
+IMPORTANT CONFIGURATION RULE:
+These business values are initial configuration, NOT values to scatter throughout the code. Create one centralized business/settings configuration model. Store business settings in the Google Sheets Settings sheet. The frontend must load settings from the backend at startup and use those settings for branding, currency, tax, receipts, reports and other display logic. Do not hard-code business details in multiple UI components. The same architecture must work if another business is configured later.
+
+============================================================
+SELECTED POS FEATURES
+============================================================
+${listEnabled(d).map(x=>"- "+x).join("\n")}
+
+============================================================
+NON-NEGOTIABLE DELIVERABLES
+============================================================
+Return exactly these three sections in your response:
+
+1. index.html
+Provide the COMPLETE working frontend as ONE self-contained HTML file containing HTML, CSS and vanilla JavaScript. Do not omit code. Do not use placeholders such as "rest of code here", "implement this", pseudo-code, or incomplete functions.
+
+2. Code.gs
+Provide the COMPLETE Google Apps Script backend, ready to paste into Google Sheets -> Extensions -> Apps Script. Do not omit functions and do not provide pseudo-code.
+
+3. Setup Instructions
+Provide clear numbered setup instructions for Google Sheets, Apps Script, deployment, URL configuration, Netlify deployment and testing.
+
+============================================================
+TECHNOLOGY & HOSTING CONSTRAINTS
+============================================================
+- Frontend: plain HTML, CSS and vanilla JavaScript.
+- Prefer one self-contained index.html.
+- No React, Vue, Angular, npm, Node.js or build process.
+- Frontend must be directly deployable to Netlify.
+- Backend must be Google Apps Script Code.gs.
+- Database must be Google Sheets.
+- Google Apps Script is deployed as a Web App.
+- Do not require localhost.
+- Do not require a generator backend.
+- Do not expose private API keys in index.html.
+
+CRITICAL URL RULE:
+At the very top of index.html, create exactly ONE clearly identifiable configuration variable:
+const GOOGLE_SCRIPT_URL = "PASTE_YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE";
+Every frontend/backend request MUST use this one variable. Do not scatter or duplicate the Web App URL elsewhere. The user should only need to replace this one value.
+
+============================================================
+GOOGLE SHEETS DATABASE
+============================================================
+The backend must include setupDatabase() and automatically create these sheets if they do not exist:
+- Settings
+- Products
+- Categories
+- Sales
+- SaleItems
+- Customers
+- Expenses
+
+Create useful headers automatically. Make setupDatabase() safe to run more than once.
+
+Recommended schemas:
+
+Settings:
+key, value, updatedAt
+
+Products:
+id, sku, barcode, name, categoryId, categoryName, price, cost, stock, lowStockLimit, imageUrl, active, createdAt, updatedAt
+
+Categories:
+id, name, description, active, createdAt, updatedAt
+
+Sales:
+id, invoiceId, customerId, customerName, subtotal, discount, tax, total, paymentMethod, itemCount, date, createdAt
+
+SaleItems:
+id, saleId, invoiceId, productId, productName, sku, quantity, unitPrice, unitCost, discount, lineTotal, createdAt
+
+Customers:
+id, name, phone, email, address, createdAt, updatedAt
+
+Expenses:
+id, category, amount, date, description, createdAt, updatedAt
+
+Use IDs/invoice IDs that are unique enough for a small-business system. Use server-side timestamps where appropriate.
+
+============================================================
+GOOGLE APPS SCRIPT API
+============================================================
+Implement a clean JSON API using doGet(e) and/or doPost(e). Use a single action dispatcher so frontend and backend stay synchronized.
+
+Support at minimum these actions:
+getSettings
+saveSettings
+getProducts
+saveProduct
+updateProduct
+deleteProduct
+getCategories
+saveCategory
+getCustomers
+saveCustomer
+getSales
+createSale
+getExpenses
+saveExpense
+updateExpense
+deleteExpense
+getDashboardData
+
+The API must:
+- Return JSON consistently.
+- Validate action names.
+- Validate input types and required fields.
+- Validate prices, costs, quantities, tax, discount and totals.
+- Prevent selling more stock than is available unless the product is intentionally configured for a controlled exception; prefer rejecting insufficient stock.
+- Update stock atomically within the sale workflow as far as Apps Script/Sheets reasonably permits.
+- Save the Sale row and SaleItems rows.
+- Roll back or avoid partial writes where practical.
+- Return friendly error messages to the frontend without leaking raw stack traces.
+- Handle missing sheets by calling setupDatabase().
+- Sanitize/normalize values.
+- Never accept arbitrary spreadsheet formulas from user input.
+- Use LockService around createSale to reduce race conditions when two checkouts happen close together.
+- Keep the response shape predictable, e.g. {success:true,data:...} and {success:false,error:"friendly message"}.
+
+Suggested request shape:
+{action:"getProducts", payload:{...}}
+
+Suggested response:
+{success:true,data:[...]}
+or
+{success:false,error:"Unable to load products."}
+
+The exact action names and response formats MUST match between index.html and Code.gs.
+
+============================================================
+FIRST-RUN & SETTINGS
+============================================================
+When the POS opens:
+1. Check the Google Apps Script connection.
+2. Load Settings.
+3. If settings exist, load the POS.
+4. If settings are missing, show a setup state.
+5. The setup state must allow the business settings to be saved/edited.
+6. The POS Settings page must allow later editing of business configuration.
+
+Seed the Settings sheet with the business configuration supplied above when practical, while still keeping all settings editable and centralized.
+
+Settings must include:
+businessName
+businessCategory
+currency
+currencySymbol
+address
+city
+country
+phone
+email
+website
+logo
+primaryColor
+taxEnabled
+taxRate
+receiptFooter
+receiptShowAddress
+receiptShowPhone
+receiptShowEmail
+receiptShowLogo
+
+============================================================
+DYNAMIC BRANDING & CURRENCY
+============================================================
+The POS title/header should dynamically use:
+[Business Name] POS
+
+The UI may also show a friendly category label such as:
+[Business Category] Store
+
+NEVER hard-code LKR, USD, $, Rs, or another currency into business logic. Create a central currency formatter using the loaded currency settings. For example:
+LKR + Rs -> Rs 2,500
+USD + $ -> $25.00
+Respect the configured currency throughout products, checkout, receipts, dashboard, reports, expenses and profit calculations.
+
+============================================================
+PRODUCT MANAGEMENT
+============================================================
+Implement working UI and API behavior for:
+- Add Product
+- Edit Product
+- Delete Product
+- Search Product
+- Category filtering
+- SKU
+- Barcode
+- Price
+- Cost
+- Stock
+- Low Stock Limit
+- Product Image URL
+
+Products must persist in Google Sheets.
+
+Product management must include validation and friendly errors.
+
+============================================================
+POS CHECKOUT
+============================================================
+Implement a real checkout flow:
+- Product search
+- Category filter
+- Add to cart
+- Increase quantity
+- Decrease quantity
+- Remove item
+- Clear cart
+- Optional customer selection
+- Discount
+- Tax
+- Subtotal
+- Grand total
+- Payment method
+
+Payment methods:
+Cash
+Card
+Bank Transfer
+Other
+
+On checkout:
+1. Validate cart is not empty.
+2. Validate every quantity.
+3. Validate current stock.
+4. Calculate subtotal.
+5. Apply discount safely.
+6. Calculate configured tax when enabled.
+7. Calculate grand total.
+8. Create invoice ID.
+9. Save Sale.
+10. Save SaleItems.
+11. Update stock.
+12. Clear cart only after successful persistence.
+13. Show a success state.
+14. Offer a professional printable receipt.
+
+Never trust totals sent from the browser without server-side validation/recalculation.
+
+============================================================
+PRINTABLE RECEIPT
+============================================================
+Create a professional receipt optimized for printing with print CSS.
+
+Dynamically display, based on settings:
+- Logo when enabled and available
+- Business Name
+- Business Category
+- Address when enabled
+- Phone when enabled
+- Email when enabled
+- Invoice Number
+- Date/time
+- Items
+- Quantity
+- Unit Price
+- Discount
+- Tax
+- Total
+- Payment Method
+- Receipt Footer
+
+Use a print-only receipt view/window or a reliable print stylesheet. Do not make receipt printing depend on a backend PDF service.
+
+============================================================
+DASHBOARD
+============================================================
+Create a usable dashboard with:
+- Today's sales
+- Today's orders
+- Total products
+- Low stock products
+- Total customers
+- Today's expenses
+- Estimated profit
+
+All values must come from Google Sheets via the backend. Define estimated profit clearly, for example sales revenue minus estimated product cost of sold items minus expenses, using the stored product cost at sale time.
+
+============================================================
+CUSTOMERS
+============================================================
+Implement:
+- Add customer
+- Edit customer
+- Search customer
+- Customer purchase history
+- Name
+- Phone
+- Email
+- Address
+
+Persist customer data in Customers and associate sales with customers when selected.
+
+============================================================
+EXPENSES
+============================================================
+Implement:
+- Add expense
+- Edit expense
+- Delete expense
+- Expense category
+- Amount
+- Date
+- Description
+
+Persist in Expenses and validate amounts/dates.
+
+============================================================
+REPORTS
+============================================================
+Implement usable reports for:
+- Daily sales
+- Weekly sales
+- Monthly sales
+- Best-selling products
+- Low-stock products
+- Expenses
+- Estimated profit
+- Payment method breakdown
+
+Use configured currency formatting. Provide date filters where practical. Reports must use backend data rather than fake demo numbers.
+
+============================================================
+SELECTED FEATURE RULE
+============================================================
+Implement all selected features listed above as working MVP functionality.
+
+For any feature NOT selected, do not build an unnecessary full UI for it. Keep the architecture extensible, but prioritize the selected features.
+
+Core POS behavior must remain coherent even if optional features are disabled.
+
+============================================================
+AI BUSINESS ASSISTANT
+============================================================
+${d.features.aiAssistant.enabled ? `The user selected AI Business Assistant.
+
+Include an OPTIONAL secure AI assistant architecture. Do NOT put any AI API secret in index.html. The browser must never contain a private AI API key.
+
+If AI is implemented, use a secure server-side endpoint such as a Netlify Function (or clearly separated secure backend endpoint) to call the AI provider. The assistant may answer:
+- What are my best-selling products?
+- What are my total sales today?
+- Which products are low in stock?
+- Which products are not selling?
+- Give me a sales summary.
+
+Only send necessary aggregated business data to the AI. Do not expose secrets or send unnecessary customer PII.
+
+Because the required primary deliverables remain exactly index.html and Code.gs, do not make the core POS dependent on the AI assistant. The POS must work fully without AI. Clearly label the AI assistant as optional and explain where a secure server-side integration would be added.` : `The user did not select AI Business Assistant. Do not add an AI API requirement or expose any AI key. Keep the POS fully functional without AI.`}
+
+============================================================
+RESPONSIVE UX
+============================================================
+The POS must work well on:
+- Mobile
+- Tablet
+- Desktop
+
+Mobile is especially important.
+
+Use a responsive layout with:
+- Easy-to-tap controls
+- Sticky or easily accessible cart/checkout controls on mobile
+- Compact product cards/list
+- Responsive tables
+- Modal/drawer patterns where appropriate
+- Clear loading states
+- Empty states
+- Confirmation for destructive actions
+- Friendly validation messages
+- Success/error toast notifications
+
+The checkout should require minimal clicks.
+
+============================================================
+NAVIGATION & UX
+============================================================
+Build a professional small-business POS interface with sensible navigation such as:
+Dashboard
+POS / Checkout
+Products
+Categories
+Customers
+Sales
+Expenses
+Reports
+Settings
+
+Only include sections relevant to selected features, while keeping core navigation coherent.
+
+Use the configured primary color for branding.
+
+Avoid unnecessary animations. Prioritize speed, clarity and usability.
+
+============================================================
+SECURITY & DATA QUALITY
+============================================================
+- Never expose private API keys.
+- Validate all user inputs.
+- Validate numeric values.
+- Prevent negative prices, costs, quantities, tax or inappropriate discounts.
+- Prevent invalid sales.
+- Recalculate critical sale totals on the server.
+- Do not trust browser-provided stock.
+- Use LockService during checkout.
+- Escape user content before injecting it into HTML.
+- Do not use unsafe innerHTML with untrusted values without escaping.
+- Handle network/API errors.
+- Handle Apps Script errors.
+- Show friendly error messages.
+- Do not expose raw backend errors, stack traces or spreadsheet internals to customers.
+- Avoid accidental duplicate submissions with loading/disabled states.
+- Use semantic HTML and accessible labels/buttons.
+- Do not store secrets in the Settings sheet.
+
+============================================================
+GOOGLE APPS SCRIPT DEPLOYMENT
+============================================================
+The setup instructions MUST explain:
+
+STEP 1: Create a new Google Sheet.
+STEP 2: Open Extensions -> Apps Script.
+STEP 3: Paste the complete Code.gs.
+STEP 4: Save.
+STEP 5: Run setupDatabase() once if required.
+STEP 6: Authorize the requested Google permissions.
+STEP 7: Deploy -> New deployment -> Web app.
+Recommended:
+Execute as: Me
+Who has access: Anyone
+STEP 8: Copy the Web App URL.
+STEP 9: Open the generated index.html.
+STEP 10: Replace ONLY:
+const GOOGLE_SCRIPT_URL = "PASTE_YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE";
+with the real Web App URL.
+STEP 11: Deploy index.html to Netlify.
+STEP 12: Open the Netlify URL and test connection, products, checkout, receipt and reports.
+
+Explain that the Web App deployment URL should be the /exec URL, not an Apps Script editor URL.
+
+============================================================
+NETLIFY DEPLOYMENT
+============================================================
+The generated index.html must work without Node.js or npm.
+
+Instructions:
+- Save the generated frontend as index.html.
+- Replace the single GOOGLE_SCRIPT_URL value.
+- Deploy the file to Netlify using a simple static site deployment.
+- No build command is required.
+- No framework is required.
+
+============================================================
+QUALITY BAR
+============================================================
+This must be a REAL WORKING MVP, not a mockup.
+
+Every major button must do something meaningful:
+- Save
+- Edit
+- Delete
+- Search
+- Add to cart
+- Checkout
+- Print receipt
+- Load dashboard
+- Load reports
+- Save settings
+- Add customer
+- Add expense
+
+Do not create fake UI, fake data, dead buttons, placeholder functions or mismatched APIs.
+
+Make index.html and Code.gs a matched pair. Verify mentally that every frontend API action exists in Code.gs and that request/response structures agree.
+
+Do not rely on CORS tricks that require a development server. Design the Google Apps Script Web App interaction for a static Netlify frontend. If fetch behavior requires special handling, implement a robust JSONP-compatible GET fallback or another practical Apps Script-compatible approach, while keeping the central GOOGLE_SCRIPT_URL rule. Prefer a clean, maintainable request mechanism that works from a static Netlify origin.
+
+Do not require the user to manually create spreadsheet headers.
+
+============================================================
+OUTPUT FORMAT — FOLLOW EXACTLY
+============================================================
+
+# 1. index.html
+
+Provide the complete code in one html code block.
+
+At the very top of its JavaScript configuration, include exactly:
+const GOOGLE_SCRIPT_URL = "PASTE_YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE";
+
+# 2. Code.gs
+
+Provide the complete Google Apps Script code in one javascript code block.
+
+# 3. Setup Instructions
+
+Provide numbered instructions covering:
+1. Google Sheet creation
+2. Apps Script
+3. Code.gs paste
+4. setupDatabase()
+5. Permissions
+6. Web App deployment
+7. Copying the /exec URL
+8. Replacing GOOGLE_SCRIPT_URL
+9. Netlify deployment
+10. Testing the POS
+11. Troubleshooting connection/API errors
+
+Do not omit any code. Do not shorten the implementation. Do not say "for brevity". Do not tell me to implement missing parts. The response must be usable by a non-technical small-business owner.
+
+FINAL REMINDER:
+The business details above personalize the initial configuration, but the resulting POS must be a reusable universal POS architecture. Centralize configuration in Settings and keep all business-specific values dynamic.`;
+}
+
+function showToast(msg){
+  const t=$("toast"); t.textContent=msg; t.classList.add("show"); clearTimeout(window.__toast);
+  window.__toast=setTimeout(()=>t.classList.remove("show"),2200);
+}
+$("generatorForm").addEventListener("submit",e=>{
+  e.preventDefault();
+  if(!validate()) return;
+  const d=getData();
+  $("promptOutput").value=buildPrompt(d);
+  $("outputCard").classList.add("show");
+  $("outputCard").scrollIntoView({behavior:"smooth",block:"start"});
+  showToast("POS prompt generated.");
+});
+$("copyBtn").addEventListener("click",async()=>{
+  const text=$("promptOutput").value;
+  try{await navigator.clipboard.writeText(text);$("copyBtn").textContent="Copied!";showToast("Prompt copied to clipboard.");setTimeout(()=>$("copyBtn").textContent="Copy Prompt",1600)}
+  catch{
+    $("promptOutput").focus();$("promptOutput").select();document.execCommand("copy");
+    $("copyBtn").textContent="Copied!";showToast("Prompt copied.");setTimeout(()=>$("copyBtn").textContent="Copy Prompt",1600);
+  }
+});
+$("downloadBtn").addEventListener("click",()=>{
+  const d=getData();
+  const safe=(d.businessName||"Business").replace(/[<>:"/\\|?*\x00-\x1F]/g,"").replace(/\s+/g,"-").slice(0,70)||"Business";
+  const blob=new Blob([$("promptOutput").value],{type:"text/plain;charset=utf-8"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`POS-Prompt-${safe}.txt`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),500);
+  showToast("Prompt downloaded.");
+});
+$("editBtn").addEventListener("click",()=>{
+  $("outputCard").classList.remove("show");
+  $("generatorForm").scrollIntoView({behavior:"smooth",block:"start"});
+});
+$("resetTop").addEventListener("click",()=>{
+  if(!confirm("Reset all entered details and feature selections?")) return;
+  $("generatorForm").reset();
+  $("customCategoryField").style.display="none";
+  $("taxPanel").classList.remove("show");
+  $("primaryColor").value="#6d5dfc";$("primaryColorText").value="#6d5dfc";
+  FEATURE_DEFS.forEach(([id,, ,checked])=>$("feature_"+id).checked=checked);
+  document.querySelectorAll(".invalid").forEach(x=>x.classList.remove("invalid"));
+  document.querySelectorAll(".error.show").forEach(x=>x.classList.remove("show"));
+  $("outputCard").classList.remove("show");
+  window.scrollTo({top:0,behavior:"smooth"});
+});
+</script>
+</body>
+</html>
